@@ -23,7 +23,7 @@ except IndexError:
 if not os.path.exists(folder_path):
     sys.exit("Folder Path Not Found")
 def unknown_file(ext):
-    api=os.getenv("GROQ_API_KEY")
+  #  api=os.getenv("GROQ_API_KEY")
     groq = Groq(api_key=api)
 
     response = groq.chat.completions.create(
