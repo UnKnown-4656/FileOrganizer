@@ -1,53 +1,121 @@
 # 🗂️ FileOrganizer
 
 ![Python](https://img.shields.io/badge/Python-100%25-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
+![LLM](https://img.shields.io/badge/LLM-Groq%20AI-orange)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-![LLM](https://img.shields.io/badge/LLM-Supported-purple?logo=openai)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-> A fast and efficient Python tool to automatically organize files into categorized folders based on file type — now with **LLM support for unknown extensions**.
+> A fast and efficient Python CLI tool that automatically organizes files in any folder into categorized subfolders based on file extension — powered by **Groq AI** for unknown file types.
 
 ---
 
 ## 📋 Table of Contents
 
-- [Features](#-features)a
-- [What's New](#-whats-new)
+- [Features](#-features)
+- [How It Works](#-how-it-works)
+- [Supported Categories](#-supported-categories)
+- [LLM Support](#-llm-support-for-unknown-extensions)
 - [Installation](#-installation)
 - [Usage](#-usage)
-- [How It Works](#-how-it-works)
-- [Supported File Types](#-supported-file-types)
-- [LLM Support](#-llm-support-for-unknown-extensions)
 - [Logging](#-logging)
 - [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
+- [Known Issues & Notes](#-known-issues--notes)
 - [Author](#-author)
 
 ---
 
 ## ✨ Features
 
-- 📁 **Auto Categorization** — Automatically sorts files into folders by type (images, videos, documents, etc.)
-- 🔁 **Duplicate File Handling** — Safely handles duplicate files without overwriting
-- 📂 **Auto Folder Creation** — Creates category folders automatically if they don't exist
-- 🤖 **LLM Support** — Uses a language model to intelligently categorize files with unknown or rare extensions
-- 📝 **Logging System** — Tracks every file operation in `log.txt` for full transparency
-- ⚡ **Fast & Lightweight** — Pure Python, minimal dependencies
+- 📁 **Auto Categorization** — Sorts files into folders by extension using a large built-in extension map
+- 🤖 **Groq AI Fallback** — Unknown file extensions are sent to Groq AI which returns the best folder name
+- 🔁 **Duplicate File Safety** — Files with the same name get renamed as `file(1).ext`, `file(2).ext` etc. instead of being overwritten
+- 📂 **Auto Folder Creation** — Creates destination folders automatically if they don't exist
+- 📝 **Logging** — Every file move, duplicate, and unknown extension is logged to `log.txt`
+- ⚡ **Fast Lookup** — Uses a dictionary (`ext_map`) for O(1) extension lookup instead of slow loops
+- 🖥️ **CLI Based** — Run directly from terminal with a folder path as argument
 
 ---
 
-## 🆕 What's New
+## ⚙️ How It Works
 
-### v1.1 — LLM Support for Unknown Extensions *(Latest)*
-- Added **LLM-powered categorization** for files with unknown or unrecognized extensions
-- When the tool encounters a file type it doesn't recognize, it now queries an LLM to intelligently decide the best folder category
-- Improved logging to capture LLM-assisted decisions in `log.txt`
+```
+📁 Messy Folder (input via CLI)
+│
+├── photo.jpg       →  📁 images/
+├── report.pdf      →  📁 documents/
+├── song.mp3        →  📁 audio/
+├── movie.mp4       →  📁 video/
+├── script.py       →  📁 code/
+├── data.json       →  📁 data/
+├── model.gguf      →  📁 ml_models/
+├── report.pdf      →  📁 documents/report(1).pdf  ← duplicate handled
+└── weird.xyz       →  🤖 Groq AI decides → 📁 <ai_suggested_folder>/
+```
 
-### v1.0 — Initial Release
-- Core file organization by extension
-- Auto folder creation
-- Duplicate file safety
-- Basic logging
+**Internal flow:**
+1. Reads folder path from CLI argument (`sys.argv[1]`)
+2. Lists all files using `os.listdir()`
+3. Skips subfolders — only processes files
+4. Extracts extension using `os.path.splitext()`
+5. Looks up extension in `ext_map` dictionary
+6. If not found → calls `unknown_file(ext)` which queries Groq AI
+7. Groq AI returns a JSON with `{"extension": "...", "folder_name": "..."}`
+8. Adds new extension to `ext_map` for future use in same run
+9. Creates destination folder if it doesn't exist
+10. Checks for duplicates → renames if needed
+11. Moves file using `shutil.move()`
+12. Logs every action to `log.txt`
+
+---
+
+## 📂 Supported Categories
+
+| Category | Example Extensions |
+|---|---|
+| `documents` | `.pdf` `.docx` `.txt` `.md` `.epub` `.pages` |
+| `spreadsheets` | `.xlsx` `.xls` `.csv` `.ods` `.numbers` |
+| `presentations` | `.pptx` `.ppt` `.odp` `.key` |
+| `images` | `.jpg` `.png` `.gif` `.svg` `.psd` `.raw` `.heic` |
+| `audio` | `.mp3` `.wav` `.flac` `.aac` `.ogg` `.m4a` |
+| `video` | `.mp4` `.mkv` `.avi` `.mov` `.webm` `.3gp` |
+| `archives` | `.zip` `.rar` `.7z` `.tar` `.gz` `.iso` `.apk` |
+| `code` | `.py` `.js` `.ts` `.html` `.css` `.java` `.cpp` `.go` `.rs` |
+| `scripts` | `.sh` `.bat` `.ps1` `.cmd` `.bash` |
+| `data` | `.json` `.xml` `.yaml` `.toml` `.env` `.parquet` |
+| `database` | `.sql` `.db` `.sqlite` `.sqlite3` |
+| `fonts` | `.ttf` `.otf` `.woff` `.woff2` |
+| `3d` | `.obj` `.fbx` `.stl` `.blend` `.glb` `.dwg` |
+| `executables` | `.exe` `.msi` `.dll` `.bin` `.pyc` |
+| `subtitles` | `.srt` `.vtt` `.ass` `.sub` |
+| `gis` | `.shp` `.geojson` `.gpx` `.kml` |
+| `certificates` | `.pem` `.crt` `.p12` `.pfx` `.gpg` |
+| `ml_models` | `.pt` `.onnx` `.gguf` `.safetensors` `.keras` |
+| `shortcuts` | `.lnk` `.url` `.webloc` |
+| `logs` | `.log` `.trace` `.evtx` |
+| `unknown` | anything else → **Groq AI decides** 🤖 |
+
+---
+
+## 🤖 LLM Support for Unknown Extensions
+
+When a file extension is **not found** in the built-in `ext_map`, the tool calls **Groq AI**:
+
+```python
+def unknown_file(ext):
+    groq = Groq(api_key=api)
+    response = groq.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        ...
+        response_format={"type": "json_schema", ...}
+    )
+    return {result["extension"]: result["folder_name"]}
+```
+
+- Groq returns a structured JSON response: `{"extension": ".xyz", "folder_name": "misc"}`
+- The new extension is **added to `ext_map`** so it's reused within the same run
+- The decision is logged in `log.txt`
+
+> ⚠️ Requires a valid `GROQ_API_KEY` in your `.env` file
 
 ---
 
@@ -73,85 +141,46 @@ uv sync
 
 Using `pip`:
 ```bash
-pip install -r requirements.txt
+pip install groq
 ```
+
+### Setup API Key
+
+Create a `.env` file in the project root:
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+> 🔑 Get your free API key at [console.groq.com](https://console.groq.com)
 
 ---
 
-## 🛠️ Usage
+## 🖥️ Usage
 
 ```bash
-python main.py
+python main.py "C:\Users\user\Desktop\MessyFolder"
 ```
 
-You will be prompted to enter the path of the folder you want to organize:
-
-```
-Enter folder path to organize: /path/to/your/messy/folder
-```
-
-The tool will then automatically sort all files into categorized subfolders.
-
----
-
-## ⚙️ How It Works
-
-```
-📁 Messy Folder
-├── photo.jpg        →   📁 Images/
-├── report.pdf       →   📁 Documents/
-├── song.mp3         →   📁 Music/
-├── movie.mp4        →   📁 Videos/
-├── archive.zip      →   📁 Archives/
-└── unknown.xyz      →   🤖 LLM decides → 📁 Misc/ or best match
+**On Linux/Mac:**
+```bash
+python main.py /home/user/Downloads
 ```
 
-1. Scans all files in the target directory
-2. Matches each file extension to a known category
-3. For unknown extensions → queries LLM for best category
-4. Creates folders if they don't exist
-5. Moves files safely, renaming duplicates
-6. Logs every action to `log.txt`
-
----
-
-## 📂 Supported File Types
-
-| Category   | Extensions                                      |
-|------------|-------------------------------------------------|
-| Images     | `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.svg`, `.webp` |
-| Videos     | `.mp4`, `.mkv`, `.avi`, `.mov`, `.wmv`, `.flv`  |
-| Music      | `.mp3`, `.wav`, `.flac`, `.aac`, `.ogg`         |
-| Documents  | `.pdf`, `.docx`, `.doc`, `.txt`, `.xlsx`, `.pptx` |
-| Archives   | `.zip`, `.rar`, `.tar`, `.gz`, `.7z`            |
-| Code       | `.py`, `.js`, `.html`, `.css`, `.java`, `.cpp`  |
-| Unknown    | Anything else → **handled by LLM** 🤖          |
-
----
-
-## 🤖 LLM Support for Unknown Extensions
-
-When FileOrganizer encounters a file with an **unrecognized extension**, it uses an LLM to intelligently determine the most suitable category.
-
-This means even rare or custom file types are handled gracefully instead of being dumped into a generic "Other" folder.
-
-```python
-# Example: .sketch, .fig, .blend → LLM identifies these as Design files
-```
-
-> **Note:** LLM support requires an internet connection or a locally configured model. See `pyproject.toml` for configuration.
+**What happens:**
+- All files in the given folder get sorted into subfolders
+- A `log.txt` file is created/updated with every action
 
 ---
 
 ## 📝 Logging
 
-All file operations are recorded in `log.txt`:
+All operations are appended to `log.txt` in your project directory:
 
 ```
-[2026-03-23 14:30:01] MOVED: photo.jpg → Images/photo.jpg
-[2026-03-23 14:30:01] CREATED FOLDER: Documents/
-[2026-03-23 14:30:02] DUPLICATE: report.pdf → Documents/report_1.pdf
-[2026-03-23 14:30:02] LLM DECISION: unknown.xyz → Misc/
+photo.jpg Moved to C:\Desktop\MessyFolder\images
+report.pdf Moved to C:\Desktop\MessyFolder\documents
+Already Exists: report.pdf moved as report(1).pdf
+unknown file extension: weird.xyz added to dict
 ```
 
 ---
@@ -160,39 +189,38 @@ All file operations are recorded in `log.txt`:
 
 ```
 FileOrganizer/
-├── main.py           # Core logic — file scanning, categorization, moving
+├── main.py           # Core logic — scanning, categorizing, moving files
 ├── pyproject.toml    # Project config and dependencies
 ├── uv.lock           # Locked dependency versions
-├── log.txt           # Auto-generated operation log
+├── log.txt           # Auto-generated operation log (git ignored)
+├── .env              # Your Groq API key (git ignored ⚠️ never commit this)
+├── .gitignore        # Ignores .env and log.txt
 └── README.md         # You are here
 ```
 
 ---
 
-## 🤝 Contributing
+## ⚠️ Known Issues & Notes
 
-Contributions are welcome! Here's how:
-
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m "Add your feature"`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+- `log.txt` is created in the **project directory**, not the organized folder
+- The `.env` file **must never be committed** to GitHub — always keep it in `.gitignore`
+- Groq AI is called **once per unknown extension** per run — if the same unknown extension appears multiple times, it reuses the cached result
+- Currently only supports **flat folders** — files inside subfolders are not organized recursively
 
 ---
 
-## 👩‍💻 Author
+## 👨‍💻 Author
 
 **UnKnown** — [@UnKnown-4656](https://github.com/UnKnown-4656)
 
-> Built with ❤️ for developers and anyone tired of messy folders.
+> Built from scratch with Python — learning by doing 🚀
 
 ---
 
 ## 🔍 Keywords
 
-`file-organizer` `python` `automation` `file-management` `llm` `python-tool` `file-sorting` `productivity` `unknown-4656`
+`file-organizer` `python` `automation` `file-management` `groq-ai` `llm` `cli-tool` `python-tool` `file-sorting` `productivity`
 
 ---
 
-*⭐ If this tool helped you, consider giving it a star on GitHub!*
+*⭐ If this tool helped you, consider giving it a star!*
