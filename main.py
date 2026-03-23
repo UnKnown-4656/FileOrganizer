@@ -1,16 +1,29 @@
 import os #shows files
 import shutil #actions
+import  sys #CLI
 
 #functions of os i know listdir==to get list of files
 #os.path.isfile==it checks the selection is file or not
 #os.path.join==it helps to define correct path
 #os.path.exists==y
 
-folders_path=r"C:\Users\user\Desktop" #path defined
+#folders_path=sys.argv[1] #path defined
+#
+#if not folders_path:    Not working trying another
+#    print("Enter folder Path!")
+#
+try:
+    folder_path = sys.argv[1]
+except IndexError:
+    print("Folder path not provided")
+    sys.exit()
 
-def already_exsisting_file(file,destination_path):
+if not os.path.exists(folder_path):
+    sys.exit("Folder Path Not Found")
+
+def already_existing_file(file,destination_path):
     name,ext=os.path.splitext(file)
-    new_path=os.path.join(destination_path,name)
+    new_path=os.path.join(destination_path,name+ext)
     i=1
     while os.path.exists(new_path):
         new_path=os.path.join(destination_path,f"{name}({i}){ext}")
@@ -186,7 +199,7 @@ def organize_files(folder_path):
           if not os.path.isfile(source_path):#check it is file or folder and skips folders
               continue
           moved=False
-          ext=os.path.splitext(file)[1].lower()#its still complex using os splits the dictionary and find the file using exstintion its like i have dictonary like {"image":".jpeg"} it take index 1 of that means ".jpeg"
+          ext=os.path.splitext(file)[1].lower()#its still complex using os plits the dictionary and fisnd the file using exstintion its like i have dictonary like {"image":".jpeg"} it take index 1 of that means ".jpeg"
           folder_name=ext_map.get(ext)
 
           if folder_name is None: #uses to unknow type of files to skip them
@@ -200,7 +213,7 @@ def organize_files(folder_path):
           final_destination_path = os.path.join(destination_path, file)
 
           if os.path.exists(final_destination_path):
-              new_path=already_exsisting_file(file,destination_path)
+              new_path=already_existing_file(file,destination_path)
               shutil.move(source_path,new_path)
               log.write(f'Already Exisist:{file} moved as {new_path}\n')
           else:
@@ -230,7 +243,7 @@ def organize_files(folder_path):
 
 ##
 
-organize_files(folders_path)
+organize_files(folder_path)
 #Understanding 'for' loop to dictionary
 #dictonary={
 #    "NAME":"Test",
