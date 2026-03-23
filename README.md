@@ -1,4 +1,18 @@
-Its Just A Test Project
+# FileOrganizer
 
+A fast and efficient Python tool to automatically organize files 
+into categorized folders based on file type.
 
-i made to understand os and git ,github
+## Features
+- Auto categorization (images, videos, documents, etc.)
+- Handles duplicate files safely
+- Creates folders automatically
+- Logging system
+
+## Usage
+python main.py
+
+## Future Plans
+- CLI tool
+- GUI version
+- AI-based smart sorting
