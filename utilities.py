@@ -51,9 +51,10 @@ def already_existing_file(file,destination_path):
 def undo_function():
    with open("log.txt", "r") as log:
     for undo in log:
-        source, destination = undo.strip().split("->")
         if "->" not in undo:
             continue
+        source, destination = undo.strip().split("->")
+
         try:
             os.rename(destination, source)
         except OSError:
