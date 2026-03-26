@@ -31,6 +31,7 @@
 - 🔁 **Duplicate File Handling** — Renames duplicates safely without overwriting anything
 - 📂 **Auto Folder Creation** — Creates category folders automatically if they don't exist
 - 🤖 **AI-Powered Unknown Extensions** — Uses Groq LLM to decide the best folder for unrecognized file types and remembers them for next time
+- ↩️ **Undo Support** — Reverse the last organize operation with a single flag
 - 📝 **Logging** — Every file move is recorded in `log.txt` for full transparency
 - ⚡ **Fast & Lightweight** — Pure Python, minimal dependencies
 
@@ -38,7 +39,12 @@
 
 ## 🆕 What's New
 
-### v1.1 — AI Support for Unknown Extensions *(Latest)*
+### v1.2 — Undo Support *(Latest)*
+- New `--undo` flag to reverse the last organize operation
+- All file moves are logged in `source->destination` format for accurate reversal
+- Safely skips malformed or empty log lines
+
+### v1.1 — AI Support for Unknown Extensions
 - Unknown file extensions are now handled by **Groq LLM** — it decides the best folder name
 - New extension-to-folder mappings are **saved back to `data.json`** automatically so the AI is only called once per extension
 - Improved logging captures AI-assisted decisions separately
@@ -90,12 +96,15 @@ export GROQ_API_KEY="your_key_here"
 python main.py <folder_path>
 ```
 
-**Example:**
+**Organize:**
 ```bash
 python main.py C:\Users\user\Desktop\MessyFolder
 ```
 
-The tool will scan the folder, sort all files, and log every action.
+**Undo last organize:**
+```bash
+python main.py C:\Users\user\Desktop\MessyFolder --undo
+```
 
 ---
 
@@ -116,6 +125,7 @@ The tool will scan the folder, sort all files, and log every action.
 4. Creates destination folder if it doesn't exist
 5. Moves the file safely, renaming if a duplicate exists
 6. Logs every action to `log.txt`
+7. Run with `--undo` to reverse all moves from the log
 
 ---
 
@@ -156,10 +166,11 @@ Saved to data.json ✓
 All operations are recorded in `log.txt`:
 
 ```
-photo.jpg Moved to C:\Desktop\MessyFolder\images
-report(1).pdf Already Exists: moved as report(1).pdf
-unknown file extension: .xyz added to dict
+C:\Desktop\MessyFolder\photo.jpg->C:\Desktop\MessyFolder\images\photo.jpg
+C:\Desktop\MessyFolder\report.pdf->C:\Desktop\MessyFolder\documents\report.pdf
 ```
+
+Each line follows `source->destination` format, used by the `--undo` flag to reverse moves.
 
 ---
 
