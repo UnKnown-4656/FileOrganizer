@@ -1,5 +1,6 @@
 import os #shows files
 import json
+import shutil
 from groq import Groq
 
 def unknown_file(ext):
@@ -46,5 +47,17 @@ def already_existing_file(file,destination_path):
         new_path=os.path.join(destination_path,f"{name}({i}){ext}")
         i+=1
     return new_path
+
+def undo_function():
+   with open("log.txt", "r") as log:
+    for undo in log:
+        source, destination = undo.strip().split("->")
+        if "->" not in undo:
+            continue
+        try:
+            os.rename(destination, source)
+        except OSError:
+            shutil.move(destination, source)
+
 
 

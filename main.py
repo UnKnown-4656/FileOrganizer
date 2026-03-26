@@ -4,6 +4,7 @@ import  sys #CLI
 import json
 from utilities import unknown_file
 from utilities import already_existing_file
+from utilities import undo_function
 
 #functions of os i know listdir==to get list of files
 #os.path.isfile==it checks the selection is file or not
@@ -28,7 +29,6 @@ if not os.path.exists(folder_path):
 
 def organize_files(folder_path):
     files=os.listdir(folder_path) #getting list of files
-
     with open('log.txt', 'a') as log:
      with open('data.json', 'r+') as Ex_file:
       ext_map = json.load(Ex_file)
@@ -49,7 +49,7 @@ def organize_files(folder_path):
               Ex_file.seek(0)
               json.dump(ext_map, Ex_file)
               Ex_file.truncate()
-              log.write(f'unknown file extintion:{file} added to dict\n ')
+              #log.write(f'unknown file extintion:{file} added to dict\n ')
               folder_name=v
 
           destination_path = os.path.join(folder_path, folder_name)
@@ -64,15 +64,18 @@ def organize_files(folder_path):
                   os.rename(source_path,new_path)
               except OSError:
                   shutil.move(source_path,new_path)
-              log.write(f'Already Exisist:{file} moved as {new_path}\n')
+              log.write(f'{source_path}->{new_path}\n')
           else:
               try:
                   os.rename(source_path,final_destination_path)
               except OSError:
                   shutil.move(source_path, final_destination_path)
 
-              log.write(f"{file} Moved to {destination_path}\n")
+              log.write(f"{source_path}->{final_destination_path}\n")
 
 
-organize_files(folder_path)
+if len(sys.argv)>2 and sys.argv[2]=="--undo":
+    undo_function()
+else:
+    organize_files(folder_path)
 
