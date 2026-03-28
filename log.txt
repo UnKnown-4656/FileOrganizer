@@ -1,4 +1,0 @@
-C:\Users\user\Desktop\TestingUndo\doc.pdf->C:\Users\user\Desktop\TestingUndo\documents\doc.pdf
-C:\Users\user\Desktop\TestingUndo\image.jpg->C:\Users\user\Desktop\TestingUndo\images\image.jpg
-C:\Users\user\Desktop\TestingUndo\doc.pdf->C:\Users\user\Desktop\TestingUndo\documents\doc.pdf
-C:\Users\user\Desktop\TestingUndo\image.jpg->C:\Users\user\Desktop\TestingUndo\images\image.jpg

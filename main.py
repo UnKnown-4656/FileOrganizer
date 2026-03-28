@@ -26,56 +26,59 @@ except IndexError:
 if not os.path.exists(folder_path):
     sys.exit("Folder Path Not Found")
 
+class FileOrganizer:
+    def __init__(self,folder_path):
+        self.folder_path=folder_path
 
-def organize_files(folder_path):
-    files=os.listdir(folder_path) #getting list of files
-    with open('log.txt', 'a') as log:
-     with open('data.json', 'r+') as Ex_file:
-      ext_map = json.load(Ex_file)
-      for file in files:
-          source_path = os.path.join(folder_path, file)
-          if not os.path.isfile(source_path):
-              continue
-          moved=False
-          ext=os.path.splitext(file)[1].lower()
-          folder_name=ext_map.get(ext)
+    def organize_files(self):
+        files=os.listdir(self.folder_path) #getting list of files
+        with open('log.txt', 'a') as log:
+         with open('data.json', 'r+') as Ex_file:
+          ext_map = json.load(Ex_file)
+          for file in files:
+              source_path = os.path.join(self.folder_path, file)
+              if not os.path.isfile(source_path):
+                  continue
+              ext=os.path.splitext(file)[1].lower()
+              folder_name=ext_map.get(ext)
 
-          if folder_name is None:
-              new_exti=unknown_file(ext)
+              if folder_name is None:
+                  new_exti=unknown_file(ext)
 
-              for k,v in new_exti.items():
-                  ext_map[k]=v
+                  for k,v in new_exti.items():
+                      ext_map[k]=v
 
-              Ex_file.seek(0)
-              json.dump(ext_map, Ex_file)
-              Ex_file.truncate()
-              #log.write(f'unknown file extintion:{file} added to dict\n ')
-              folder_name=v
+                  Ex_file.seek(0)
+                  json.dump(ext_map, Ex_file)
+                  Ex_file.truncate()
+                  #log.write(f'unknown file extintion:{file} added to dict\n ')
+                  folder_name=v
 
-          destination_path = os.path.join(folder_path, folder_name)
+              destination_path = os.path.join(self.folder_path, folder_name)
 
-          if not os.path.exists(destination_path):
-              os.makedirs(destination_path)
-          final_destination_path = os.path.join(destination_path, file)
+              if not os.path.exists(destination_path):
+                  os.makedirs(destination_path)
+              final_destination_path = os.path.join(destination_path, file)
 
-          if os.path.exists(final_destination_path):
-              new_path=already_existing_file(file,destination_path)
-              try:
-                  os.rename(source_path,new_path)
-              except OSError:
-                  shutil.move(source_path,new_path)
-              log.write(f'{source_path}->{new_path}\n')
-          else:
-              try:
-                  os.rename(source_path,final_destination_path)
-              except OSError:
-                  shutil.move(source_path, final_destination_path)
-
-              log.write(f"{source_path}->{final_destination_path}\n")
+              if os.path.exists(final_destination_path):
+                  new_path=already_existing_file(file,destination_path)
+                  try:
+                      os.rename(source_path,new_path)
+                  except OSError:
+                      shutil.move(source_path,new_path)
+                  log.write(f'{source_path}->{new_path}\n')
+              else:
+                  try:
+                      os.rename(source_path,final_destination_path)
+                  except OSError:
+                      shutil.move(source_path, final_destination_path)
+                  log.write("--BREAK--\n")
+                  log.write(f"{source_path}->{final_destination_path}\n")
 
 
 if len(sys.argv)>2 and sys.argv[2]=="--undo":
     undo_function()
 else:
-    organize_files(folder_path)
+    organize=FileOrganizer(folder_path)
+    organize.organize_files()
 
