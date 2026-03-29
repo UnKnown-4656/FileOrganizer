@@ -126,7 +126,7 @@ Feel free to fork and improve this project!
 
 ## 📜 License
 
-MIT License (recommended)
+MIT License
 
 ---
 
